@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -16,6 +15,10 @@
 		<jakarta.servlet.version>6.0.0</jakarta.servlet.version>
 		<jackson.version>2.19.2</jackson.version>
 		<junit.version>5.12.2</junit.version>
+		<postgresql.jdbc.driver.version>42.7.11</postgresql.jdbc.driver.version>
+		<hikari.connection-pool.version>7.0.2</hikari.connection-pool.version>
+		<logback-classic.version>1.5.34</logback-classic.version>
+		<lombok.version>1.18.46</lombok.version>
 	</properties>
 
 	<dependencies>
@@ -42,6 +45,44 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- JDBC Driver -->
+		<!-- Source: https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.jdbc.driver.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Connection Pool -->
+		<!-- Source: https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>${hikari.connection-pool.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Logging -->
+		<!-- Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+		<!-- Source: https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback-classic.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Lombok -->
+		<!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
 
 	</dependencies>
 
