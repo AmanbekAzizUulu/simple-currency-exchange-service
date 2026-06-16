@@ -12,6 +12,7 @@ import com.dandaev.edu.mapper.JsonMapper;
 import com.dandaev.edu.service.ExchangeRateService;
 import com.dandaev.edu.service.ExchangeRateServiceImpl;
 import com.dandaev.edu.validator.BigDecimalValidator;
+import com.dandaev.edu.validator.CurrencyCodeValidator;
 import com.dandaev.edu.validator.RequestParamValidator;
 
 import jakarta.servlet.ServletException;
@@ -38,9 +39,12 @@ public class ExchangeServlet extends HttpServlet {
 		String to = req.getParameter("to");
 		String amountStr = req.getParameter("amount");
 
-		RequestParamValidator.requireNotEmpty(from, "from");
-		RequestParamValidator.requireNotEmpty(to, "to");
-		RequestParamValidator.requireNotEmpty(amountStr, "amount");
+		RequestParamValidator.requireNotEmpty("from", from);
+		RequestParamValidator.requireNotEmpty("to", to);
+		RequestParamValidator.requireNotEmpty("amount", amountStr);
+
+		CurrencyCodeValidator.validate(from.strip());
+		CurrencyCodeValidator.validate(to.strip());
 
 		BigDecimal amount = BigDecimalValidator.parseAndValidate(amountStr, "amount");
 

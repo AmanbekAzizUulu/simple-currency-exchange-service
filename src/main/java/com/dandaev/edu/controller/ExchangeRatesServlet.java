@@ -14,6 +14,7 @@ import com.dandaev.edu.mapper.JsonMapper;
 import com.dandaev.edu.service.ExchangeRateService;
 import com.dandaev.edu.service.ExchangeRateServiceImpl;
 import com.dandaev.edu.validator.BigDecimalValidator;
+import com.dandaev.edu.validator.CurrencyCodeValidator;
 import com.dandaev.edu.validator.ExchangeRateValidator;
 import com.dandaev.edu.validator.RequestParamValidator;
 
@@ -46,9 +47,12 @@ public class ExchangeRatesServlet extends HttpServlet {
 		String targetCode = req.getParameter("targetCurrencyCode");
 		String rateStr = req.getParameter("rate");
 
-		RequestParamValidator.requireNotEmpty(baseCode, "baseCurrencyCode");
-		RequestParamValidator.requireNotEmpty(targetCode, "targetCurrencyCode");
-		RequestParamValidator.requireNotEmpty(rateStr, "rate");
+		RequestParamValidator.requireNotEmpty("baseCurrencyCode", baseCode);
+		RequestParamValidator.requireNotEmpty("targetCurrencyCode", targetCode);
+		RequestParamValidator.requireNotEmpty("rate", rateStr);
+
+		CurrencyCodeValidator.validate(baseCode.strip());
+		CurrencyCodeValidator.validate(targetCode.strip());
 
 		BigDecimal rate = BigDecimalValidator.parseAndValidate(rateStr, "rate");
 
