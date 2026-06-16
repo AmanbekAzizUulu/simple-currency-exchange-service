@@ -214,7 +214,7 @@ $CATALINA_HOME/webapps/
 
 ## 📬 Контакты
 
-**Арсен Дандаев**
+**Айбек Дандаев**
 
 Telegram: https://t.me/Aibek_Dandaev
 
