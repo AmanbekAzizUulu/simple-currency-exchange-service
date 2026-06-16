@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dandaev.edu.exception.database.DataAccessException;
 import com.dandaev.edu.exception.database.ForeignKeyConstraintViolationException;
 import com.dandaev.edu.exception.database.UniqueConstraintViolationException;
 import com.dandaev.edu.model.ExchangeRate;
@@ -78,6 +79,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 			}
 		} catch (SQLException e) {
 			LOGGER.error("Error fetching all exchange rates", e);
+			throw new DataAccessException("Failed to fetch exchange rates", e);
 		}
 		return rates;
 	}
@@ -99,6 +101,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 			}
 		} catch (SQLException e) {
 			LOGGER.error("Error fetching exchange rate for pair {}/{}", baseCode, targetCode, e);
+			throw new DataAccessException("Failed to fetch exchange rate", e);
 		}
 		return Optional.empty();
 	}
@@ -116,18 +119,21 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 					exchangeRate.setId(keys.getLong(1));
 				}
 			}
+			LOGGER.info("Created exchange rate: {}/{} = {}", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId(), exchangeRate.getRate());
 
 			return exchangeRate;
 		} catch (SQLException e) {
-			LOGGER.error("Failed to save exchange rate: baseId={}, targetId={}, rate={}", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId(), exchangeRate.getRate(), e);
-
+			LOGGER.warn("Attempt to create duplicate exchange rate: baseId={}, targetId={}", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
 			var sqlState = e.getSQLState();
 
 			if ("23505".equals(sqlState)) {
+				LOGGER.warn("Foreign key violation: currency not found for baseId={} or targetId={}", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
 				throw new UniqueConstraintViolationException(String.format("Exchange rate %d -> %d already exists", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId()), e);
 			} else if ("23503".equals(sqlState)) {
+				LOGGER.warn("NOT NULL constraint violation for exchange rate");
 				throw new ForeignKeyConstraintViolationException(String.format("Cannot save exchange rate. One of the currencies does not exist. baseId=%d, targetId=%d", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId()), e);
 			} else if ("23502".equals(sqlState)) {
+				LOGGER.error("Unexpected database error while inserting exchange rate: baseId={}, targetId={}", exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId(), e);
 				throw new IllegalArgumentException("Not null constraint violation", e);
 			}
 
@@ -145,13 +151,14 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 			int updatedRows = stmt.executeUpdate();
 
 			if (updatedRows == 0) {
-				throw new RuntimeException("Exchange rate not found for update: " + baseCode + "/" + targetCode);
+				LOGGER.warn("No exchange rate found to update: {}/{}", baseCode, targetCode);
+				throw new DataAccessException("Exchange rate not found for update: " + baseCode + "/" + targetCode);
 			}
-
+			LOGGER.info("Updated exchange rate for {}/{} to {}", baseCode, targetCode, newRate);
 			return findByPair(baseCode, targetCode).orElseThrow( () -> new RuntimeException("Exchange rate disappeared after update"));
 		} catch (SQLException e) {
 			LOGGER.error("Error updating exchange rate for {}/{}", baseCode, targetCode, e);
-			throw new RuntimeException("Failed to update exchange rate", e);
+			throw new DataAccessException("Failed to update exchange rate", e);
 		}
 	}
 

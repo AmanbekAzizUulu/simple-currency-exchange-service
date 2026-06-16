@@ -5,5 +5,4 @@ public class InvalidCurrencyCodeException extends BadRequestException {
 	public InvalidCurrencyCodeException (String code) {
 		super("Invalid currency code: " + code);
 	}
-
 }

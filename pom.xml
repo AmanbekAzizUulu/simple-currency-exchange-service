@@ -11,8 +11,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+		<jakarta.servlet.version>6.1.0</jakarta.servlet.version>
 		<jackson.version>2.19.2</jackson.version>
 		<junit.version>5.12.2</junit.version>
 		<postgresql.jdbc.driver.version>42.7.11</postgresql.jdbc.driver.version>
@@ -52,7 +51,6 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>${postgresql.jdbc.driver.version}</version>
-			<scope>compile</scope>
 		</dependency>
 
 		<!-- Connection Pool -->
@@ -82,7 +80,6 @@
 			<version>${lombok.version}</version>
 			<scope>compile</scope>
 		</dependency>
-
 
 	</dependencies>
 

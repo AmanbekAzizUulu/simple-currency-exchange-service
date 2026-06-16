@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dandaev.edu.exception.database.DataAccessException;
 import com.dandaev.edu.exception.database.UniqueConstraintViolationException;
 import com.dandaev.edu.model.Currency;
 import com.dandaev.edu.util.ConnectionManager;
@@ -114,20 +115,19 @@ public class CurrencyDaoImpl implements CurrencyDao {
 			stmt.setString(2, currency.getFullName());
 			stmt.setString(3, currency.getSign());
 			stmt.executeUpdate();
-
 			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
 				if (generatedKeys.next()) {
 					currency.setId(generatedKeys.getLong(1));
 				}
 			}
 			return currency;
-
 		} catch (SQLException e) {
-			LOGGER.error("Error saving currency: {}", currency, e);
-			if ("23505".equals(e.getSQLState())) {
-				throw new UniqueConstraintViolationException("Currency with code '" + currency.getCode() + "' already exists", e);
+			LOGGER.error("SQLState: {}", e.getSQLState(), e);
+			if ("23505".equals(e.getSQLState()) || e.getMessage().contains("duplicate key")) {
+				throw new UniqueConstraintViolationException("Currency with code '" + currency.getCode() + "' already exists", e
+				);
 			}
-			throw new RuntimeException("Failed to save currency", e);
+			throw new DataAccessException("Failed to save currency", e);
 		}
 	}
 

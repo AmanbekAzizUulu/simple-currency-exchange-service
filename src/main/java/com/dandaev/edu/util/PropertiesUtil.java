@@ -12,6 +12,10 @@ public final class PropertiesUtil {
 
 	private static final String[] PROPERTIES_FILES = { "application.properties", "database.properties" };
 
+	private PropertiesUtil () {
+		throw new UnsupportedOperationException("Utility class");
+	}
+
 	static {
 		for (String file : PROPERTIES_FILES) {
 			try (InputStream input = PropertiesUtil.class.getClassLoader().getResourceAsStream(file)) {
@@ -25,10 +29,6 @@ public final class PropertiesUtil {
 				LOGGER.error("Failed to load properties file '{}'", file, e);
 			}
 		}
-	}
-
-	private PropertiesUtil () {
-		throw new UnsupportedOperationException("Utility class");
 	}
 
 	public static String get (String key) {

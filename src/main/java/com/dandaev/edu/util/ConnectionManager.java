@@ -1,13 +1,16 @@
 package com.dandaev.edu.util;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dandaev.edu.exception.database.ConnectionException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public final class ConnectionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
@@ -18,7 +21,6 @@ public final class ConnectionManager {
 
 	public static synchronized DataSource getDataSource () {
 		if (dataSource == null) {
-
 			HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(PropertiesUtil.get("database.url"));
 			config.setUsername(PropertiesUtil.get("database.user"));
@@ -57,6 +59,7 @@ public final class ConnectionManager {
 		if (dataSource != null && !dataSource.isClosed()) {
 			LOGGER.info("Closing connection pool...");
 			dataSource.close();
+			dataSource = null; 
 		}
 	}
 }

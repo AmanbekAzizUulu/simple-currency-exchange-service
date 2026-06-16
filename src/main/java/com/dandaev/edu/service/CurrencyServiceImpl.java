@@ -7,6 +7,7 @@ import com.dandaev.edu.dao.CurrencyDao;
 import com.dandaev.edu.dto.request.CurrencyRequestDto;
 import com.dandaev.edu.dto.response.CurrencyResponseDto;
 import com.dandaev.edu.exception.bad_request.InvalidCurrencyCodeException;
+import com.dandaev.edu.exception.bad_request.InvalidCurrencyFullNameException;
 import com.dandaev.edu.exception.bad_request.InvalidCurrencySignException;
 import com.dandaev.edu.exception.conflict.CurrencyAlreadyExistsException;
 import com.dandaev.edu.exception.database.DataAccessException;
@@ -35,62 +36,62 @@ public class CurrencyServiceImpl implements CurrencyService {
 
 	@ Override
 	public CurrencyResponseDto createCurrency (CurrencyRequestDto request) {
-		String fullName = request.fullName();
+		String name = request.name();
 		String code = request.code().toUpperCase();
 		String sign = request.sign();
 
-		Currency currency = Currency.builder().code(code).fullName(fullName).sign(sign).build();
+		Currency currency = Currency.builder().code(code).fullName(name).sign(sign).build();
 		try {
+			if (!isValidCurrencyFullName(name)) {
+				throw new InvalidCurrencyFullNameException("Invalid currency full name: " + request.name());
+			}
+			if (!isValidCurrencySign(sign)) {
+				throw new InvalidCurrencySignException("Invalid currency sign: " + request.sign());
+			}
 			if (!isValidCurrencyCode(code)) {
 				throw new InvalidCurrencyCodeException("Invalid currency code: " + request.code());
-			}
-			if (!isValidSign(sign)) {
-				throw new InvalidCurrencySignException("Invalid currency sign: " + request.code());
-			}
-			if (!isValidFullName(fullName)) {
-				throw new InvalidCurrencySignException("Invalid currency full name: " + request.code());
 			}
 			currencyDao.persist(currency);
 		} catch (UniqueConstraintViolationException e) {
 			throw new CurrencyAlreadyExistsException(code);
 		} catch (DataAccessException e) {
-			throw new InternalServerErrorException("Failed to save currency", e);
+			System.out.println("DataAccessException");
+			throw new InternalServerErrorException("Database error", e);
 		}
 		return mapToDto(currency);
 	}
 
 	private CurrencyResponseDto mapToDto (Currency currency) {
-		return new CurrencyResponseDto(currency.getId(), currency.getCode(), currency.getFullName(), currency.getSign());
+		return new CurrencyResponseDto(currency.getId(), currency.getFullName(), currency.getCode(), currency.getSign());
 	}
 
 	private boolean isValidCurrencyCode (String code) {
-		if (code == null || code.trim().isEmpty()) {
+		if (code == null) {
 			return false;
 		}
-		String trimmed = code.trim();
-		return trimmed.length() == 3 && trimmed.matches("[A-Z]{3}");
+		String c = code.trim();
+		return c.matches("^[A-Z]{3}$");
 	}
 
-	private boolean isValidSign (String sign) {
-		if (sign == null || sign.trim().isEmpty()) {
+	private boolean isValidCurrencySign (String sign) {
+		if (sign == null) {
 			return false;
 		}
 		String s = sign.trim();
-		if (s.length() > 3) {
+		if (s.isEmpty() || s.length() > 3) {
 			return false;
 		}
-		return s.matches("^[A-Za-z€$£¥₽₹₸₴₦₱\\s'.]{1,3}$");
+		return s.matches("^[\\p{L}\\p{Sc}\\p{N}./,\\-\\s()]+$");
 	}
 
-	private boolean isValidFullName (String fullName) {
-		if (fullName == null || fullName.trim()
-		                                .isEmpty()) {
+	private boolean isValidCurrencyFullName (String fullName) {
+		if (fullName == null) {
 			return false;
 		}
 		String name = fullName.trim();
 		if (name.length() < 2 || name.length() > 100) {
 			return false;
 		}
-		return name.matches("^[\\p{L}\\s'\\-]+$");
+		return name.matches("^[\\p{L}\\s'\\-()]+$");
 	}
 }
